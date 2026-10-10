@@ -1,5 +1,10 @@
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
+ARG PDFIDELITY_ENGINE_REV=e6770a89ee8e7319ab710a57ea9cdc5881ca4e34
+LABEL org.opencontainers.image.source="https://github.com/andygeek/pdfidelity-translator"
+LABEL org.opencontainers.image.title="PDFidelity Translator"
+LABEL com.pdfidelity.engine.revision="${PDFIDELITY_ENGINE_REV}"
+
 WORKDIR /app
 
 
@@ -18,15 +23,11 @@ RUN apt-get update && \
      apt-get install --no-install-recommends -y libgl1 libglib2.0-0 libxext6 libsm6 libxrender1 build-essential && \
      rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml .
-RUN uv pip install --system --no-cache -r pyproject.toml && babeldoc --version && babeldoc --warmup
-
 COPY . .
 
-# Calls for a random number to break the cahing of babeldoc upgrade
-# (https://stackoverflow.com/questions/35134713/disable-cache-for-specific-run-commands/58801213#58801213)
-ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
-
-RUN uv pip install --system --no-cache . && uv pip install --system --no-cache --compile-bytecode -U babeldoc "pymupdf<1.25.3" && babeldoc --version && babeldoc --warmup
+# Install the selected PDFidelity engine instead of upgrading to upstream PyPI.
+RUN uv pip install --system --no-cache --compile-bytecode \
+     "BabelDOC @ https://github.com/andygeek/pdfidelity-engine/archive/${PDFIDELITY_ENGINE_REV}.tar.gz" . && \
+     babeldoc --version && babeldoc --warmup
 RUN pdf2zh --version
 CMD ["pdf2zh", "--gui"]

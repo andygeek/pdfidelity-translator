@@ -6,7 +6,7 @@ authors = [
     { name = "awwaawwa", email = "aw@funstory.ai" },
 ]
 maintainers = [
-    { name = "awwaawwa", email = "aw@funstory.ai" }
+    { name = "PDFidelity" }
 ]
 license = "AGPL-3.0"
 readme = "README.md"
@@ -17,8 +17,8 @@ classifiers = [
 ]
 dependencies = [
     "requests",
-    # for arm64 linux whells
-    "pymupdf<1.25.3",
+    # Keep compatible with BabelDOC 0.6.4's PyMuPDF requirement.
+    "pymupdf>=1.26.7",
     "tqdm",
     "tenacity",
     "numpy",
@@ -33,7 +33,7 @@ dependencies = [
     "gradio-pdf>=0.0.21",
     "peewee>=3.17.8",
     "fontTools",
-    "babeldoc>=0.6.2,<0.7.0",
+    "babeldoc>=0.6.4,<0.7.0",
     "rich",
     "pydantic-settings>=2.8.1",
     "pydantic>=2.10.6",
@@ -64,7 +64,13 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/PDFMathTranslate-next/PDFMathTranslate-next"
+Homepage = "https://github.com/andygeek/pdfidelity-translator"
+Repository = "https://github.com/andygeek/pdfidelity-translator"
+Issues = "https://github.com/andygeek/pdfidelity-translator/issues"
+Upstream = "https://github.com/PDFMathTranslate-next/PDFMathTranslate-next"
+
+[tool.uv.sources]
+babeldoc = { path = "../pdfidelity-engine", editable = true }
 
 [build-system]
 requires = ["hatchling"]
