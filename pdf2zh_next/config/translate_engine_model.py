@@ -101,6 +101,10 @@ class OpenAISettings(BaseModel):
     openai_enable_json_mode: bool | None = Field(
         default=None, description="Enable JSON mode for OpenAI service"
     )
+    openai_max_completion_tokens: str | None = Field(
+        default=None,
+        description="max_completion_tokens sent to the OpenAI-compatible API. Reasoning models count reasoning tokens against this limit; set it high enough to avoid empty or truncated answers.",
+    )
 
     # This parameter contains a spelling error, but it will not be corrected for compatibility reasons.
     # For details, see: https://github.com/PDFMathTranslate-next/PDFMathTranslate-next/issues/175#issuecomment-3213568681
@@ -123,6 +127,17 @@ class OpenAISettings(BaseModel):
         )
         self.openai_temperature = _clean_string(self.openai_temperature)
         self.openai_reasoning_effort = _clean_string(self.openai_reasoning_effort)
+        self.openai_max_completion_tokens = _clean_string(
+            self.openai_max_completion_tokens
+        )
+        if self.openai_max_completion_tokens:
+            try:
+                if int(self.openai_max_completion_tokens) <= 0:
+                    raise ValueError
+            except ValueError as e:
+                raise ValueError(
+                    "max_completion_tokens must be a positive integer"
+                ) from e
         if self.openai_send_temprature:
             if not self.openai_temperature:
                 raise ValueError(
@@ -644,12 +659,28 @@ class GroqSettings(BaseModel):
     groq_enable_json_mode: bool | None = Field(
         default=None, description="Enable JSON mode for Groq service"
     )
+    groq_reasoning_effort: str | None = Field(
+        default=None,
+        description="reasoning_effort for Groq reasoning models (gpt-oss: low/medium/high). Not sent when empty.",
+    )
+    groq_temperature: str | None = Field(
+        default=None, description="Temperature for Groq. Not sent when empty."
+    )
+    groq_max_completion_tokens: str | None = Field(
+        default="16384",
+        description="max_completion_tokens for Groq. Reasoning tokens count against it.",
+    )
 
     def validate_settings(self) -> None:
         if not self.groq_api_key:
             raise ValueError("Groq API key is required")
         self.groq_api_key = _clean_string(self.groq_api_key)
         self.groq_model = _clean_string(self.groq_model)
+        self.groq_reasoning_effort = _clean_string(self.groq_reasoning_effort)
+        self.groq_temperature = _clean_string(self.groq_temperature)
+        self.groq_max_completion_tokens = _clean_string(
+            self.groq_max_completion_tokens
+        )
 
     def transform(self) -> OpenAISettings:
         return OpenAISettings(
@@ -657,6 +688,11 @@ class GroqSettings(BaseModel):
             openai_api_key=self.groq_api_key,
             openai_base_url="https://api.groq.com/openai/v1",
             openai_enable_json_mode=self.groq_enable_json_mode,
+            openai_reasoning_effort=self.groq_reasoning_effort,
+            openai_send_reasoning_effort=bool(self.groq_reasoning_effort) or None,
+            openai_temperature=self.groq_temperature,
+            openai_send_temprature=bool(self.groq_temperature) or None,
+            openai_max_completion_tokens=self.groq_max_completion_tokens,
         )
 
 
