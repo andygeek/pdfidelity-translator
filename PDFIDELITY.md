@@ -41,7 +41,7 @@ This Dockerfile has not been built or deployed. The dependency and Docker change
 
 Since 2026-11-07, PDFidelity's translation workers run commit [`23bba2fd76a1ffda8f81c5e0b01b91173efa8a7e`](https://github.com/andygeek/pdfidelity-translator/commit/23bba2fd76a1ffda8f81c5e0b01b91173efa8a7e) (pdf2zh-next 2.9.0 with the 2026-11-07 changes recorded below) together with engine commit [`33f5d0bb81a121d4e41516b5c9d52a9023de078d`](https://github.com/andygeek/pdfidelity-engine/commit/33f5d0bb81a121d4e41516b5c9d52a9023de078d) (BabelDOC 0.6.2). The worker image copies both source trees over the pdf2zh-next 2.9.0 and BabelDOC 0.6.2 packages of its pinned base image; it does not use this repository's Dockerfile.
 
-Since 2026-11-09, both translation workers also run `pdf2zh_next/figure_text.py` from commit [`64819e443c31fb4c327d7f6bb6f67bac27ca53e0`](https://github.com/andygeek/pdfidelity-translator/commit/64819e443c31fb4c327d7f6bb6f67bac27ca53e0) on the `feat/figure-text-ocr` branch, enabled with `TRANSLATE_FIGURES=true`. That branch is the production commit above plus this one module; the worker image copies it over the same base. Update this section with every production change. GitHub Actions are disabled initially; inherited release/package workflows remain available for later adaptation.
+Since 2026-11-09, both translation workers also run `pdf2zh_next/figure_text.py` from commit [`fbb0340942dabebc9566173380a1a5b953d4f18c`](https://github.com/andygeek/pdfidelity-translator/commit/fbb0340942dabebc9566173380a1a5b953d4f18c) on the `feat/figure-text-ocr` branch, enabled with `TRANSLATE_FIGURES=true`. That branch is the production commit above plus this one module; the worker image copies it over the same base. Update this section with every production change. GitHub Actions are disabled initially; inherited release/package workflows remain available for later adaptation.
 
 ## Incorporating upstream changes
 
@@ -90,3 +90,4 @@ Keep fork changes identifiable and retain AGPL and copyright notices. For a modi
 ### 2026-11-09
 
 - Added `pdf2zh_next/figure_text.py` on the `feat/figure-text-ocr` branch. After the PDF is translated, it reads the text inside raster figures with Tesseract OCR, translates the labels with Groq and writes them over the original image, using each label's background color. It runs only for source languages en, es, pt, fr, de and it, and for Latin-script target languages. It skips images that cover most of the page (scans).
+- Extended the same module (commit `fbb03409`) to diagrams that draw boxes and arrows as vector graphics and put each label in its own small image. Those labels are read with OCR, translated together, covered with vector shapes in the colour behind them and rewritten as PDF text that fits each box.
