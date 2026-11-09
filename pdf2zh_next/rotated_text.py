@@ -28,6 +28,9 @@ UP, DOWN = (0, -1), (0, 1)  # PyMuPDF line direction: text reading bottom-to-top
 TURN = {UP: 90, DOWN: 270}  # page rotation that makes that text horizontal
 BACK = {UP: 90, DOWN: -90}  # rotation that lays the turned copy back over the page
 # Margin stamps and lines without words are not worth a copy of the page.
+# Every copy is one more page for the engine: a document with very many sideways
+# pages must still finish within the job's time limit.
+MAX_COPIES = int(os.environ.get("ROTATED_MAX_COPIES", "25"))
 NOISE = re.compile(r"^(arXiv:\S+.*|[\W\d_]+)$")
 WORD = re.compile(r"[^\W\d_]{2,}")
 
@@ -76,6 +79,9 @@ def prepare(src, dst):
                 skipped.append({"page": number, "reason": "rotated or cropped page"})
                 continue
             wanted.append((number, direction, len(lines)))
+    for number, _, _ in wanted[MAX_COPIES:]:
+        skipped.append({"page": number, "reason": "too many sideways pages"})
+    wanted = wanted[:MAX_COPIES]
     copies = []
     for number, direction, lines in wanted:  # all the copies first, then turn them
         doc.fullcopy_page(number)
