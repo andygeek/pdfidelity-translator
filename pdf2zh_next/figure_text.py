@@ -513,6 +513,12 @@ def translate_figures(pdf_path, targets, li, lo, debug_dir=None, dry_run=False):
             if xref in done or min(info[2], info[3]) < MIN_IMAGE_SIDE:
                 continue
             done.add(xref)
+            rects = page.get_image_rects(xref)
+            covered = sum(abs(r & page.rect) for r in rects)
+            if rects and covered > 0.6 * abs(page.rect):
+                # a scanned page, not a figure: whole-page OCR handles it
+                report.append({"page": page.number + 1, "xref": xref, "skipped": "page scan"})
+                continue
             try:
                 entry = translate_one(doc, page, xref, info[1], outs, li, lo, lang, font_path, reference, debug_dir,
                                       dry_run)
