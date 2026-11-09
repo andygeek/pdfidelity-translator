@@ -31,11 +31,15 @@ Keep provider/model integration, translation configuration, and the CLI/API adap
 
 ## Container build configuration
 
-The Dockerfile installs this checkout and the PDFidelity engine at commit `e6770a89ee8e7319ab710a57ea9cdc5881ca4e34`. `PDFIDELITY_ENGINE_REV` is the build argument that selects the engine revision. To adopt a later engine change, update the argument default to its full commit SHA. Release builds should use reviewed, immutable commits rather than a moving branch.
+The Dockerfile installs this checkout and the PDFidelity engine at commit `88d62288dc27a19d9c3992a1a8ff9037e74428b3` (engine `main`: BabelDOC 0.6.4 with the PDFidelity engine changes). `PDFIDELITY_ENGINE_REV` is the build argument that selects the engine revision. To adopt a later engine change, update the argument default to its full commit SHA. Release builds should use reviewed, immutable commits rather than a moving branch.
 
 The legacy `pymupdf<1.25.3` cap was incompatible with BabelDOC 0.6.4, which requires `pymupdf>=1.26.7`. Both package constraints now agree, and the BabelDOC lower bound is 0.6.4. The Dockerfile no longer replaces our engine with an unpinned PyPI upgrade or uses a random cache-breaking request.
 
-This initial setup has not installed dependencies, run tests, built a container, or changed PDFidelity's production deployment. The dependency and Docker changes still require runtime validation before deployment. GitHub Actions are disabled initially; inherited release/package workflows remain available for later adaptation.
+This Dockerfile has not been built or deployed. The dependency and Docker changes still require runtime validation before deployment.
+
+## Production revision
+
+Since 2026-11-07, PDFidelity's translation workers run commit [`23bba2fd76a1ffda8f81c5e0b01b91173efa8a7e`](https://github.com/andygeek/pdfidelity-translator/commit/23bba2fd76a1ffda8f81c5e0b01b91173efa8a7e) (pdf2zh-next 2.9.0 with the 2026-11-07 changes recorded below) together with engine commit [`33f5d0bb81a121d4e41516b5c9d52a9023de078d`](https://github.com/andygeek/pdfidelity-engine/commit/33f5d0bb81a121d4e41516b5c9d52a9023de078d) (BabelDOC 0.6.2). The worker image copies both source trees over the pdf2zh-next 2.9.0 and BabelDOC 0.6.2 packages of its pinned base image; it does not use this repository's Dockerfile. Update this section with every production change. GitHub Actions are disabled initially; inherited release/package workflows remain available for later adaptation.
 
 ## Incorporating upstream changes
 
@@ -71,3 +75,12 @@ Keep fork changes identifiable and retain AGPL and copyright notices. For a modi
 - Configured editable sibling-engine development with uv.
 - Aligned BabelDOC and PyMuPDF version constraints with our engine baseline.
 - Configured Docker to install a pinned commit of our engine and removed the upstream-only upgrade/cache-busting steps.
+
+### 2026-11-07
+
+- Added `groq_reasoning_effort`, `groq_temperature` and `groq_max_completion_tokens` (default 16384, because gpt-oss counts reasoning tokens against that limit) to the Groq settings.
+- Treated empty content or `finish_reason=length` as an incomplete completion and retried it, together with timeouts, connection errors and 5xx responses, up to three times.
+
+### 2026-11-08
+
+- Pinned the Dockerfile to engine commit `88d62288dc27a19d9c3992a1a8ff9037e74428b3`, which includes the engine changes of 2026-11-07.

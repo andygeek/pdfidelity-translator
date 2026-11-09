@@ -1,6 +1,6 @@
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
-ARG PDFIDELITY_ENGINE_REV=e6770a89ee8e7319ab710a57ea9cdc5881ca4e34
+ARG PDFIDELITY_ENGINE_REV=88d62288dc27a19d9c3992a1a8ff9037e74428b3
 LABEL org.opencontainers.image.source="https://github.com/andygeek/pdfidelity-translator"
 LABEL org.opencontainers.image.title="PDFidelity Translator"
 LABEL com.pdfidelity.engine.revision="${PDFIDELITY_ENGINE_REV}"
